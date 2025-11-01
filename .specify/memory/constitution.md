@@ -48,7 +48,7 @@ The project MUST use Dagger for local CI execution. This ensures that CI/CD pipe
 A test-driven development (TDD) approach is mandatory. Tests MUST be written before the implementation, and the implementation must be written to pass the tests. This ensures that all code is testable and that the tests accurately reflect the requirements.
 
 ### XI. Kafka Client
-The project MUST use `confluent-kafka-javascript` for all Kafka client interactions. `kafkajs` is explicitly disallowed. This ensures compatibility with the Confluent Cloud and leverages the officially supported client.
+The project MUST use `@confluentinc/kafka-javascript` for all Kafka client interactions. `kafkajs` is explicitly disallowed. This ensures compatibility with the Confluent Cloud and leverages the officially supported client.
 
 ### XII. Stream Processing
 The project MUST use Apache Flink for stream processing and real-time analytics. This allows for stateful computations over data streams, which is essential for complex AML transaction monitoring.

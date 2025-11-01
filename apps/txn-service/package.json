@@ -1,0 +1,28 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "start": "node dist/index.js",
+    "lint": "biome lint .",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:migrate": "node -r esbuild-register src/db/migrate.ts"
+  },
+  "dependencies": {
+    "effect": "^3.18.4",
+    "@effect/platform-node": "^0.53.7",
+    "drizzle-orm": "^0.29.3",
+    "pg": "^8.11.3",
+    "@aws-sdk/client-s3": "^3.501.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "drizzle-kit": "^0.20.9",
+    "esbuild-register": "^3.5.0"
+  }
+}

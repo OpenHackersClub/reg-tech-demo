@@ -1,0 +1,19 @@
+{
+  "name": "@reg-tech-demo/pulumi",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w"
+
+  },
+  "dependencies": {
+    "@pulumi/pulumi": "^3.0.0",
+    "@pulumi/confluentcloud": "^1.26.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

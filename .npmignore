@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.DS_Store
+coverage/
+test/
+tests/
+*.test.js
+*.spec.js
+.idea/
+.vscode/
