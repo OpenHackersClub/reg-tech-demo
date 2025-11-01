@@ -1,0 +1,6 @@
+name: reg-tech-demo-infra
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+description: Confluent Cloud infrastructure for reg-tech-demo including Kafka and Flink

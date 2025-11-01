@@ -1,6 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,8 +10,24 @@
 !.yarn/releases
 !.yarn/versions
 
-# next.js
+# next.js (legacy)
 next-env.d.ts
 
 # vercel
 .vercel
+
+# React Router / Cloudflare
+.react-router/
+build/
+.wrangler/
+dist/
+.vite/
+.dev.vars
+
+# misc
+.DS_Store
+.env
+.env.*
+!.env.example
+!.dev.vars.example
+*.log

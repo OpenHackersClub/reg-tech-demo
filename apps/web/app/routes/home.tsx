@@ -1,4 +1,15 @@
-import Link from "next/link";
+import { Link } from "react-router";
+import type { Route } from "./+types/home";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "RegTech Demo - AML Compliance Platform" },
+    {
+      name: "description",
+      content: "Transaction monitoring and document management platform for AML compliance",
+    },
+  ];
+}
 
 export default function Home() {
   return (
@@ -24,13 +35,13 @@ export default function Home() {
             </p>
             <div className="flex flex-col gap-3">
               <Link
-                href="/documents"
+                to="/documents"
                 className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 View Documents
               </Link>
               <Link
-                href="/tooljet"
+                to="/tooljet"
                 className="flex items-center justify-center border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 Upload Document
@@ -48,7 +59,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col gap-3">
               <Link
-                href="/alerts"
+                to="/alerts"
                 className="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 View Alerts
@@ -58,7 +69,7 @@ export default function Home() {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Powered by Confluent Cloud, Apache Flink, and Next.js</p>
+          <p>Powered by Confluent Cloud, Apache Flink, and React Router</p>
         </div>
       </main>
     </div>

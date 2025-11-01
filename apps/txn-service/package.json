@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@reg-tech-demo/txn-service",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",

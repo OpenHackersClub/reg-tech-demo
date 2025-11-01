@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RegTech Demo - Web Application
+
+A modern AML compliance and transaction monitoring platform built with [React Router v7](https://reactrouter.com) and deployable to [Cloudflare Workers/Pages](https://pages.cloudflare.com).
+
+## Features
+
+- 📄 **Document Management** - Upload and manage client documents with automated analysis
+- 🚨 **Real-time Alerts** - Transaction monitoring and compliance alerts
+- 📊 **ToolJet Integration** - Embedded form for document uploads
+- 🎨 **Modern UI** - Tailwind CSS v4 with dark mode support
+- ⚡ **Edge Deployment** - Runs on Cloudflare's global network
 
 ## Getting Started
 
-First, run the development server:
+### Development
 
 ```bash
+# Install dependencies
+npm install
+
+# Start dev server with HMR
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run start
+```
+
+### Deploy to Cloudflare
+
+```bash
+# Login to Cloudflare (first time only)
+wrangler login
+
+# Build and deploy to Cloudflare Pages
+npm run deploy
+```
+
+## Environment Variables
+
+Create a `.dev.vars` file for local development:
+
+```bash
+API_URL=http://localhost:3000
+```
+
+For production, update `wrangler.json` under the `vars` section.
+
+## Routes
+
+- `/` - Home page with navigation
+- `/documents` - Client documents list
+- `/alerts` - Real-time alerts dashboard
+- `/tooljet` - Document upload form (embedded ToolJet)
+
+## Tech Stack
+
+- **Framework**: React Router v7 with SSR
+- **Runtime**: Cloudflare Workers
+- **Build Tool**: Vite 6
+- **Styling**: Tailwind CSS v4
+- **Language**: TypeScript
+- **Deployment**: Cloudflare Pages
+
+## Project Structure
+
+```
+app/
+  ├── routes/          # Application routes
+  ├── root.tsx         # Root layout
+  ├── routes.ts        # Route configuration
+  ├── entry.server.tsx # Server entry point
+  └── globals.css      # Global styles
+
+workers/
+  └── app.ts          # Cloudflare Workers entry
+
+build/
+  ├── client/         # Static client assets
+  └── server/         # SSR server bundle
+```
+
+## Documentation
+
+- [MIGRATION.md](./MIGRATION.md) - Details about the Next.js to React Router migration
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Comprehensive deployment guide
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- [React Router Documentation](https://reactrouter.com) - Learn about React Router v7
+- [Cloudflare Pages](https://developers.cloudflare.com/pages) - Cloudflare Pages documentation
+- [Vite Documentation](https://vite.dev) - Learn about Vite
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Migration Notice
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project was migrated from Next.js to React Router v7 for better edge deployment capabilities. See [MIGRATION.md](./MIGRATION.md) for details.
