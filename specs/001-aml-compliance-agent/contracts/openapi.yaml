@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: AI Compliance Agent API
+  version: 1.0.0
+paths:
+  /alerts:
+    get:
+      summary: Get a list of alerts
+      responses:
+        '200':
+          description: A list of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+  /documents:
+    post:
+      summary: Upload a document for analysis
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '202':
+          description: Document accepted for processing
+
+components:
+  schemas:
+    Alert:
+      type: object
+      properties:
+        id:
+          type: string
+        priority:
+          type: string
+          enum: [high, medium, low]
+        type:
+          type: string
+        status:
+          type: string
+          enum: [open, in_progress, closed]
