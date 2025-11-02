@@ -104,7 +104,7 @@ Built with **React Router v7** (formerly Remix) for edge-first SSR:
 ### Kafka Topics
 
 Defined in `apps/txn-service/src/config/kafka.config.ts`:
-- `transactions` - Financial transaction events
+- `txn` - Financial transaction events
 - `alerts` - AML compliance alerts from Flink detection
 
 ### Confluent Cloud Infrastructure
@@ -143,7 +143,7 @@ KAFKA_BROKERS=pkc-xxxxx.us-west-2.aws.confluent.cloud:9092
 KAFKA_API_KEY=your-api-key
 KAFKA_API_SECRET=your-api-secret
 KAFKA_CLIENT_ID=txn-service
-KAFKA_TOPIC_TRANSACTIONS=transactions
+KAFKA_TOPIC_TRANSACTIONS=txn
 FLINK_SQL_GATEWAY_URL=http://localhost:8083
 ```
 

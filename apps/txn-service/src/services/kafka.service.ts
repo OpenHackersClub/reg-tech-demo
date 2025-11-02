@@ -23,7 +23,6 @@ export const makeKafkaProducerService = Effect.gen(function* (_) {
   const kafka = new KafkaJS.Kafka({kafkaJS: config});
   const producer = kafka.producer();
   
-  console.log('kafka config', config);
   // Connect the producer
   yield* _(
     Effect.tryPromise({
@@ -97,6 +96,6 @@ export const KafkaProducerServiceLive = Layer.scoped(
   KafkaProducerService,
   Effect.acquireRelease(
     makeKafkaProducerService,
-    (service) => service.disconnect()
+    (service) => service.disconnect().pipe(Effect.orElseSucceed(() => undefined))
   )
 );

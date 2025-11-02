@@ -1,64 +1,89 @@
-import { Effect, Console, Schedule } from "effect";
+import { Effect, Console, Schedule, Layer } from "effect";
 import { NodeRuntime } from "@effect/platform-node";
 import { KafkaProducerService, KafkaProducerServiceLive } from "../services/kafka.service";
+import { FlinkSqlService, FlinkSqlServiceLive } from "../services/flink.service";
 import { KAFKA_TOPICS } from "../config/kafka.config";
 import { FLINK_CONFIG, FLINK_SQL_QUERIES } from "../config/flink.config";
 
-// Mock Flink SQL client for demonstration purposes
-const mockFlinkSqlClient = {
-  executeSql: (sqlQuery: string) =>
-    Effect.gen(function* (_) {
-      yield* _(Console.log(`Executing Flink SQL query:\n${sqlQuery}`));
-      // Simulate a delay for query execution
-      yield* _(Effect.sleep("5 seconds"));
-
-      // Simulate anomaly detection results
-      const anomaliesDetected = Math.random() > 0.7; // Simulate 30% chance of anomaly
-
-      if (anomaliesDetected) {
-        const mockAlert = {
-          id: `alert-${Date.now()}`,
-          type: "high_frequency_transactions",
-          severity: "high",
-          transactionId: `txn-${Math.floor(Math.random() * 1000)}`,
-          timestamp: new Date().toISOString(),
-          details: "Simulated high frequency transactions detected.",
-        };
-        yield* _(Console.log("Anomaly detected:", mockAlert));
-        return Effect.succeed([mockAlert]);
-      } else {
-        yield* _(Console.log("No anomalies detected in this run."));
-        return Effect.succeed([]);
-      }
-    }),
-};
-
 const program = Effect.gen(function* (_) {
   const kafkaProducer = yield* _(KafkaProducerService);
+  const flinkSql = yield* _(FlinkSqlService);
 
   yield* _(Console.log("Starting AML Detection worker..."));
   yield* _(Console.log(`Connecting to Flink SQL Gateway at: ${FLINK_CONFIG.SQL_GATEWAY_URL}`));
+
+  // Initialize Flink SQL tables (creates tables if they don't exist)
+  yield* _(flinkSql.initializeTables());
+
+  yield* _(Console.log("Starting periodic anomaly detection..."));
 
   // Periodically execute Flink SQL for anomaly detection
   yield* _(
     Effect.repeat(
       Effect.gen(function* (_) {
-        const alerts = yield* _(mockFlinkSqlClient.executeSql(FLINK_SQL_QUERIES.ANOMALY_DETECTION));
+        yield* _(Console.log("Running anomaly detection queries..."));
 
-        for (const alert of alerts) {
-          yield* _(
-            kafkaProducer.send({
-              topic: KAFKA_TOPICS.ALERTS,
-              key: alert.id,
-              value: JSON.stringify(alert),
-              headers: {
-                "content-type": "application/json",
-                source: "aml-detection-worker",
-              },
-            })
-          );
-          yield* _(Console.log(`Sent alert ${alert.id} to Kafka topic ${KAFKA_TOPICS.ALERTS}`));
-        }
+        // Execute high frequency detection query
+        yield* _(
+          Effect.gen(function* (_) {
+            yield* _(Console.log("Executing high frequency detection..."));
+            yield* _(flinkSql.executeStatement(FLINK_SQL_QUERIES.ANOMALY_DETECTION_HIGH_FREQUENCY));
+          }).pipe(
+            Effect.catchAll((error) =>
+              Effect.gen(function* (_) {
+                yield* _(Console.error(`Error in high frequency detection: ${error}`));
+                return Effect.void;
+              })
+            )
+          )
+        );
+
+        // Execute multiple receivers detection query
+        yield* _(
+          Effect.gen(function* (_) {
+            yield* _(Console.log("Executing multiple receivers detection..."));
+            yield* _(flinkSql.executeStatement(FLINK_SQL_QUERIES.ANOMALY_DETECTION_MULTIPLE_RECEIVERS));
+          }).pipe(
+            Effect.catchAll((error) =>
+              Effect.gen(function* (_) {
+                yield* _(Console.error(`Error in multiple receivers detection: ${error}`));
+                return Effect.void;
+              })
+            )
+          )
+        );
+
+        // Execute PEP transaction detection query
+        yield* _(
+          Effect.gen(function* (_) {
+            yield* _(Console.log("Executing PEP transaction detection..."));
+            yield* _(flinkSql.executeStatement(FLINK_SQL_QUERIES.ANOMALY_DETECTION_PEP_TRANSACTIONS));
+          }).pipe(
+            Effect.catchAll((error) =>
+              Effect.gen(function* (_) {
+                yield* _(Console.error(`Error in PEP detection: ${error}`));
+                return Effect.void;
+              })
+            )
+          )
+        );
+
+        // Execute high risk customer detection query
+        yield* _(
+          Effect.gen(function* (_) {
+            yield* _(Console.log("Executing high risk customer detection..."));
+            yield* _(flinkSql.executeStatement(FLINK_SQL_QUERIES.ANOMALY_DETECTION_HIGH_RISK_CUSTOMER));
+          }).pipe(
+            Effect.catchAll((error) =>
+              Effect.gen(function* (_) {
+                yield* _(Console.error(`Error in high risk customer detection: ${error}`));
+                return Effect.void;
+              })
+            )
+          )
+        );
+
+        yield* _(Console.log("✓ All anomaly detection queries submitted"));
       }),
       Schedule.fixed("30 seconds") // Run every 30 seconds
     )
@@ -67,7 +92,8 @@ const program = Effect.gen(function* (_) {
   yield* _(Console.log("AML Detection worker running indefinitely..."));
 });
 
-// Run the program with the Kafka producer layer
-const runnable = program.pipe(Effect.provide(KafkaProducerServiceLive));
+// Run the program with both Kafka producer and Flink SQL layers
+const mainLayer = Layer.mergeAll(KafkaProducerServiceLive, FlinkSqlServiceLive);
+const runnable = Effect.provide(program, mainLayer);
 
 NodeRuntime.runMain(runnable);

@@ -1,0 +1,224 @@
+{
+  "type": "record",
+  "name": "SampleRecord",
+  "namespace": "com.mycorp.mynamespace",
+  "doc": "This schema has been created from JSON messages.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": "int"
+    },
+    {
+      "name": "beneficiary_account",
+      "type": "string"
+    },
+    {
+      "name": "beneficiary_country",
+      "type": "string"
+    },
+    {
+      "name": "beneficiary_institution_bic",
+      "type": "string"
+    },
+    {
+      "name": "beneficiary_name",
+      "type": "string"
+    },
+    {
+      "name": "booking_datetime",
+      "type": "string"
+    },
+    {
+      "name": "booking_jurisdiction",
+      "type": "string"
+    },
+    {
+      "name": "cash_id_verified",
+      "type": "boolean"
+    },
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "client_risk_profile",
+      "type": "string"
+    },
+    {
+      "name": "currency",
+      "type": "string"
+    },
+    {
+      "name": "customer_id",
+      "type": "string"
+    },
+    {
+      "name": "customer_is_pep",
+      "type": "boolean"
+    },
+    {
+      "name": "customer_risk_rating",
+      "type": "string"
+    },
+    {
+      "name": "customer_type",
+      "type": "string"
+    },
+    {
+      "name": "daily_cash_total_customer",
+      "type": "int"
+    },
+    {
+      "name": "daily_cash_txn_count",
+      "type": "int"
+    },
+    {
+      "name": "edd_performed",
+      "type": "boolean"
+    },
+    {
+      "name": "edd_required",
+      "type": "boolean"
+    },
+    {
+      "name": "fx_applied_rate",
+      "type": "int"
+    },
+    {
+      "name": "fx_base_ccy",
+      "type": "string"
+    },
+    {
+      "name": "fx_counterparty",
+      "type": "string"
+    },
+    {
+      "name": "fx_indicator",
+      "type": "boolean"
+    },
+    {
+      "name": "fx_market_rate",
+      "type": "int"
+    },
+    {
+      "name": "fx_quote_ccy",
+      "type": "string"
+    },
+    {
+      "name": "fx_spread_bps",
+      "type": "int"
+    },
+    {
+      "name": "is_advised",
+      "type": "boolean"
+    },
+    {
+      "name": "kyc_due_date",
+      "type": "string"
+    },
+    {
+      "name": "kyc_last_completed",
+      "type": "string"
+    },
+    {
+      "name": "narrative",
+      "type": "string"
+    },
+    {
+      "name": "ordering_institution_bic",
+      "type": "string"
+    },
+    {
+      "name": "originator_account",
+      "type": "string"
+    },
+    {
+      "name": "originator_country",
+      "type": "string"
+    },
+    {
+      "name": "originator_name",
+      "type": "string"
+    },
+    {
+      "name": "product_complex",
+      "type": "boolean"
+    },
+    {
+      "name": "product_has_va_exposure",
+      "type": "boolean"
+    },
+    {
+      "name": "product_type",
+      "type": "string"
+    },
+    {
+      "name": "purpose_code",
+      "type": "string"
+    },
+    {
+      "name": "regulator",
+      "type": "string"
+    },
+    {
+      "name": "sanctions_screening",
+      "type": "string"
+    },
+    {
+      "name": "sow_documented",
+      "type": "boolean"
+    },
+    {
+      "name": "str_filed_datetime",
+      "type": "string"
+    },
+    {
+      "name": "suitability_assessed",
+      "type": "boolean"
+    },
+    {
+      "name": "suitability_result",
+      "type": "string"
+    },
+    {
+      "name": "suspicion_determined_datetime",
+      "type": "string"
+    },
+    {
+      "name": "swift_f50_present",
+      "type": "boolean"
+    },
+    {
+      "name": "swift_f59_present",
+      "type": "boolean"
+    },
+    {
+      "name": "swift_f70_purpose",
+      "type": "string"
+    },
+    {
+      "name": "swift_f71_charges",
+      "type": "string"
+    },
+    {
+      "name": "swift_mt",
+      "type": "string"
+    },
+    {
+      "name": "transaction_id",
+      "type": "string"
+    },
+    {
+      "name": "travel_rule_complete",
+      "type": "boolean"
+    },
+    {
+      "name": "va_disclosure_provided",
+      "type": "boolean"
+    },
+    {
+      "name": "value_date",
+      "type": "string"
+    }
+  ]
+}

@@ -38,7 +38,7 @@ KAFKA_BROKERS=pkc-xxxxx.us-east-1.aws.confluent.cloud:9092
 KAFKA_API_KEY=your-api-key
 KAFKA_API_SECRET=your-api-secret
 KAFKA_CLIENT_ID=txn-service
-KAFKA_TOPIC_TRANSACTIONS=transactions
+KAFKA_TOPIC_TRANSACTIONS=txn
 ```
 
 ### 3. Build the Project

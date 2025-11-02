@@ -1,5 +1,3 @@
-import { KafkaJS } from '@confluentinc/kafka-javascript';
-
 export interface KafkaJSConfig {
   clientId: string;
   brokers: string[];
@@ -38,6 +36,6 @@ export function getKafkaConfig(): KafkaJSConfig {
 }
 
 export const KAFKA_TOPICS = {
-  TRANSACTIONS: "transactions",
+  TRANSACTIONS: "txn",
   ALERTS: "alerts",
 };
