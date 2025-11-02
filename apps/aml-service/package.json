@@ -1,0 +1,36 @@
+{
+  "name": "@reg-tech-demo/aml-service",
+  "version": "1.0.0",
+  "description": "AML sanction list checking service using agentic AI approach",
+  "type": "module",
+  "scripts": {
+    "build": "tsdown --target node --format esm --entry src/index.ts --entry src/check-entity.ts --clean",
+    "dev": "tsdown --target node --format esm --entry src/index.ts --watch",
+    "start": "node dist/index.js",
+    "check:entity": "node dist/check-entity.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check ."
+  },
+  "keywords": [
+    "aml",
+    "sanctions",
+    "compliance",
+    "effect",
+    "ai-agent"
+  ],
+  "dependencies": {
+    "@effect/ai": "^0.18.2",
+    "@effect/ai-openai": "^0.18.2",
+    "@effect/platform": "^0.76.1",
+    "@effect/platform-node": "^0.70.1",
+    "@effect/schema": "^0.79.1",
+    "effect": "^3.12.3",
+    "openai": "^4.77.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.2",
+    "tsdown": "^0.2.20",
+    "typescript": "^5.7.2"
+  }
+}
