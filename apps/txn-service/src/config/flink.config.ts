@@ -66,7 +66,7 @@ export const FLINK_DDL = {
       proctime AS PROCTIME()
     ) WITH (
       'connector' = 'kafka',
-      'topic' = 'txn',
+      'topic' = 'transaction',
       'properties.bootstrap.servers' = '${FLINK_CONFIG.KAFKA_BROKERS}',
       'properties.security.protocol' = 'SASL_SSL',
       'properties.sasl.mechanism' = 'PLAIN',

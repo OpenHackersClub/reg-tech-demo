@@ -78,7 +78,7 @@ CREATE TABLE transactions (
   WATERMARK FOR timestamp AS timestamp - INTERVAL '5' SECOND
 ) WITH (
   'connector' = 'kafka',
-  'topic' = 'txn',
+  'topic' = 'transaction',
   'properties.bootstrap.servers' = '<kafka-bootstrap-endpoint>',
   'scan.startup.mode' = 'earliest-offset',
   'format' = 'json'

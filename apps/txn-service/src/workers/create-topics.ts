@@ -24,7 +24,7 @@ async function createTopics() {
     console.log('Connected to Kafka admin');
 
     // Create topics
-    const topics = ['txn', 'alerts'];
+    const topics = ['transaction', 'alerts'];
 
     await admin.createTopics({
       topics: topics.map(topic => ({

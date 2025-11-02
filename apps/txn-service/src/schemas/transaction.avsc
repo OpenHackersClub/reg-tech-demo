@@ -1,0 +1,278 @@
+{
+  "type": "record",
+  "name": "SampleRecord",
+  "namespace": "com.mycorp.mynamespace",
+  "doc": "Financial transaction record for AML compliance monitoring",
+  "fields": [
+    {
+      "name": "transaction_id",
+      "type": "string",
+      "doc": "Unique identifier for the transaction"
+    },
+    {
+      "name": "customer_id",
+      "type": "string",
+      "doc": "Unique identifier for the customer"
+    },
+    {
+      "name": "amount",
+      "type": "int",
+      "doc": "Transaction amount in base currency units"
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "doc": "ISO 4217 currency code"
+    },
+    {
+      "name": "value_date",
+      "type": "string",
+      "doc": "Value date for the transaction (ISO 8601 format)"
+    },
+    {
+      "name": "booking_datetime",
+      "type": "string",
+      "doc": "Date and time when transaction was booked (ISO 8601 format)"
+    },
+    {
+      "name": "booking_jurisdiction",
+      "type": "string",
+      "doc": "Jurisdiction where transaction was booked"
+    },
+    {
+      "name": "originator_name",
+      "type": "string",
+      "doc": "Name of the transaction originator"
+    },
+    {
+      "name": "originator_account",
+      "type": "string",
+      "doc": "Account number of the originator"
+    },
+    {
+      "name": "originator_country",
+      "type": "string",
+      "doc": "ISO 3166 country code of the originator"
+    },
+    {
+      "name": "beneficiary_name",
+      "type": "string",
+      "doc": "Name of the beneficiary"
+    },
+    {
+      "name": "beneficiary_account",
+      "type": "string",
+      "doc": "Account number of the beneficiary"
+    },
+    {
+      "name": "beneficiary_country",
+      "type": "string",
+      "doc": "ISO 3166 country code of the beneficiary"
+    },
+    {
+      "name": "ordering_institution_bic",
+      "type": "string",
+      "doc": "BIC code of the ordering institution"
+    },
+    {
+      "name": "beneficiary_institution_bic",
+      "type": "string",
+      "doc": "BIC code of the beneficiary institution"
+    },
+    {
+      "name": "channel",
+      "type": "string",
+      "doc": "Transaction channel (e.g., online, branch, mobile)"
+    },
+    {
+      "name": "product_type",
+      "type": "string",
+      "doc": "Type of financial product"
+    },
+    {
+      "name": "narrative",
+      "type": "string",
+      "doc": "Transaction narrative or description"
+    },
+    {
+      "name": "purpose_code",
+      "type": "string",
+      "doc": "ISO 20022 purpose code"
+    },
+    {
+      "name": "customer_type",
+      "type": "string",
+      "doc": "Type of customer (e.g., retail, corporate)"
+    },
+    {
+      "name": "customer_risk_rating",
+      "type": "string",
+      "doc": "Risk rating assigned to the customer"
+    },
+    {
+      "name": "client_risk_profile",
+      "type": "string",
+      "doc": "Risk profile classification of the client"
+    },
+    {
+      "name": "customer_is_pep",
+      "type": "boolean",
+      "doc": "Whether customer is a Politically Exposed Person"
+    },
+    {
+      "name": "kyc_last_completed",
+      "type": "string",
+      "doc": "Date when KYC was last completed (ISO 8601 format)"
+    },
+    {
+      "name": "kyc_due_date",
+      "type": "string",
+      "doc": "Due date for next KYC review (ISO 8601 format)"
+    },
+    {
+      "name": "edd_required",
+      "type": "boolean",
+      "doc": "Whether Enhanced Due Diligence is required"
+    },
+    {
+      "name": "edd_performed",
+      "type": "boolean",
+      "doc": "Whether Enhanced Due Diligence has been performed"
+    },
+    {
+      "name": "sow_documented",
+      "type": "boolean",
+      "doc": "Whether Source of Wealth is documented"
+    },
+    {
+      "name": "sanctions_screening",
+      "type": "string",
+      "doc": "Result of sanctions screening check"
+    },
+    {
+      "name": "regulator",
+      "type": "string",
+      "doc": "Regulatory body overseeing the transaction"
+    },
+    {
+      "name": "suspicion_determined_datetime",
+      "type": "string",
+      "doc": "Date and time when suspicion was determined (ISO 8601 format)"
+    },
+    {
+      "name": "str_filed_datetime",
+      "type": "string",
+      "doc": "Date and time when Suspicious Transaction Report was filed (ISO 8601 format)"
+    },
+    {
+      "name": "fx_indicator",
+      "type": "boolean",
+      "doc": "Whether transaction involves foreign exchange"
+    },
+    {
+      "name": "fx_base_ccy",
+      "type": "string",
+      "doc": "Base currency for FX transaction"
+    },
+    {
+      "name": "fx_quote_ccy",
+      "type": "string",
+      "doc": "Quote currency for FX transaction"
+    },
+    {
+      "name": "fx_applied_rate",
+      "type": "int",
+      "doc": "Applied FX rate (scaled)"
+    },
+    {
+      "name": "fx_market_rate",
+      "type": "int",
+      "doc": "Market FX rate (scaled)"
+    },
+    {
+      "name": "fx_spread_bps",
+      "type": "int",
+      "doc": "FX spread in basis points"
+    },
+    {
+      "name": "fx_counterparty",
+      "type": "string",
+      "doc": "FX counterparty identifier"
+    },
+    {
+      "name": "swift_mt",
+      "type": "string",
+      "doc": "SWIFT message type"
+    },
+    {
+      "name": "swift_f50_present",
+      "type": "boolean",
+      "doc": "Whether SWIFT field 50 is present"
+    },
+    {
+      "name": "swift_f59_present",
+      "type": "boolean",
+      "doc": "Whether SWIFT field 59 is present"
+    },
+    {
+      "name": "swift_f70_purpose",
+      "type": "string",
+      "doc": "SWIFT field 70 purpose of payment"
+    },
+    {
+      "name": "swift_f71_charges",
+      "type": "string",
+      "doc": "SWIFT field 71 charges information"
+    },
+    {
+      "name": "travel_rule_complete",
+      "type": "boolean",
+      "doc": "Whether FATF travel rule requirements are complete"
+    },
+    {
+      "name": "cash_id_verified",
+      "type": "boolean",
+      "doc": "Whether cash transaction ID has been verified"
+    },
+    {
+      "name": "daily_cash_txn_count",
+      "type": "int",
+      "doc": "Number of cash transactions today for this customer"
+    },
+    {
+      "name": "daily_cash_total_customer",
+      "type": "int",
+      "doc": "Total cash transaction amount today for this customer"
+    },
+    {
+      "name": "product_complex",
+      "type": "boolean",
+      "doc": "Whether the product is classified as complex"
+    },
+    {
+      "name": "product_has_va_exposure",
+      "type": "boolean",
+      "doc": "Whether product has virtual asset exposure"
+    },
+    {
+      "name": "va_disclosure_provided",
+      "type": "boolean",
+      "doc": "Whether virtual asset disclosure was provided"
+    },
+    {
+      "name": "suitability_assessed",
+      "type": "boolean",
+      "doc": "Whether suitability assessment was performed"
+    },
+    {
+      "name": "suitability_result",
+      "type": "string",
+      "doc": "Result of suitability assessment"
+    },
+    {
+      "name": "is_advised",
+      "type": "boolean",
+      "doc": "Whether transaction was advised by representative"
+    }
+  ]
+}
