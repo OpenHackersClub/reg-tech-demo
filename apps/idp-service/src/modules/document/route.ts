@@ -1,10 +1,7 @@
 import { Hono } from 'hono';
-import { zodResponseFormat } from 'openai/helpers/zod.js';
 
-import { openAi } from '@/service/ai.js';
-
-import { RECEIPT_PROMPT } from './prompt.js';
-import { ReceiptDataSchema } from './schema/receipt.js';
+import { classifyDocument } from './service/classify.js';
+import { extractReceipt } from './service/extraction.js';
 
 const documentRoute = new Hono();
 
@@ -41,37 +38,26 @@ documentRoute.post('/parse/receipt', async (c) => {
       );
     }
 
-    const resp = await openAi.chat.completions.parse({
-      model: 'meta-llama/llama-4-maverick',
-      messages: [
-        { role: 'system', content: RECEIPT_PROMPT },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Please extract all data from this receipt image and return it in the structured format.',
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/jpeg;base64,${base64}`,
-                detail: 'auto',
-              },
-            },
-          ],
-        },
-      ],
-      response_format: zodResponseFormat(ReceiptDataSchema, 'receipt_data'),
-      temperature: 0.1,
-      max_tokens: 4000,
-    });
+    const base64Image = `data:image/jpeg;base64,${base64}`;
 
-    const content = resp.choices[0].message;
+    const classificationResult = await classifyDocument(base64Image);
+
+    if (classificationResult?.document_type !== 'receipt') {
+      return c.json(
+        {
+          success: false,
+          error: 'Invalid document type. Please upload a receipt image.',
+          details: classificationResult,
+        },
+        400,
+      );
+    }
+
+    const content = await extractReceipt(base64Image);
 
     return c.json({
       success: true,
-      data: content.parsed,
+      data: content,
       source: file ? 'uploaded' : 'default',
     });
   } catch (error) {
