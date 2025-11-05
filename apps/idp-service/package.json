@@ -8,7 +8,10 @@
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.51.0",
+    "@effect/ai": "^0.32.0",
+    "@effect/ai-openai": "^0.35.0",
     "@hono/node-server": "^1.19.6",
+    "effect": "^3.19.0",
     "hono": "^4.10.4",
     "openai": "^6.8.0",
     "zod": "^4.1.12"
