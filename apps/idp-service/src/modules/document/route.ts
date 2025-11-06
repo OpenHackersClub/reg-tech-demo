@@ -1,17 +1,16 @@
 import { Hono } from 'hono';
 
-import { classifyDocument } from './service/classify.js';
-import { extractReceipt } from './service/extraction.js';
+import { extractDocument } from './service/extraction.js';
 
 const documentRoute = new Hono();
 
-documentRoute.post('/parse/receipt', async (c) => {
+documentRoute.post('/parse/receipt/effect', async (c) => {
   try {
-    let base64: string;
-
     // Try to parse form data first (file upload)
     const formData = await c.req.formData();
     const file = formData.get('file');
+
+    let doc: Buffer<ArrayBuffer>;
 
     if (file && file instanceof File) {
       // Validate file type
@@ -27,7 +26,7 @@ documentRoute.post('/parse/receipt', async (c) => {
 
       // Convert uploaded file to base64
       const fileBuffer = Buffer.from(await file.arrayBuffer());
-      base64 = fileBuffer.toString('base64');
+      doc = fileBuffer;
     } else {
       return c.json(
         {
@@ -38,22 +37,17 @@ documentRoute.post('/parse/receipt', async (c) => {
       );
     }
 
-    const base64Image = `data:image/jpeg;base64,${base64}`;
+    const content = await extractDocument(doc);
 
-    const classificationResult = await classifyDocument(base64Image);
-
-    if (classificationResult?.document_type !== 'receipt') {
+    if (!content) {
       return c.json(
         {
           success: false,
-          error: 'Invalid document type. Please upload a receipt image.',
-          details: classificationResult,
+          error: 'No content extracted.',
         },
         400,
       );
     }
-
-    const content = await extractReceipt(base64Image);
 
     return c.json({
       success: true,

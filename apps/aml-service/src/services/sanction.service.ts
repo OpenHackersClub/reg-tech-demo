@@ -6,13 +6,13 @@ import type { OpenAIConfig } from "../config/openai.config.js";
 
 // Schema for sanction check result
 export class SanctionCheckResult extends Schema.Class<SanctionCheckResult>(
-  "SanctionCheckResult"
+  "SanctionCheckResult",
 )({
   entityName: Schema.String,
   isSanctioned: Schema.Boolean,
   confidence: Schema.Number.pipe(
     Schema.greaterThanOrEqualTo(0),
-    Schema.lessThanOrEqualTo(1)
+    Schema.lessThanOrEqualTo(1),
   ),
   matchedLists: Schema.Array(Schema.String),
   reasoning: Schema.String,
@@ -22,7 +22,7 @@ export class SanctionCheckResult extends Schema.Class<SanctionCheckResult>(
 
 // Schema for sanction list information
 export class SanctionListInfo extends Schema.Class<SanctionListInfo>(
-  "SanctionListInfo"
+  "SanctionListInfo",
 )({
   listName: Schema.String,
   entityName: Schema.String,
@@ -39,7 +39,7 @@ const searchOFACSanctionsTool = AiToolkit.toolDef({
     "Search the OFAC (Office of Foreign Assets Control) sanctions list for a given entity name. This includes SDN (Specially Designated Nationals) list.",
   input: Schema.Struct({
     entityName: Schema.String.pipe(
-      Schema.description("The entity name to search for in OFAC sanctions")
+      Schema.description("The entity name to search for in OFAC sanctions"),
     ),
   }),
   output: Schema.Array(SanctionListInfo),
@@ -83,7 +83,7 @@ const searchOFACSanctionsTool = AiToolkit.toolDef({
           entity.aliases.some(
             (alias) =>
               alias.toLowerCase().includes(normalizedName) ||
-              normalizedName.includes(alias.toLowerCase())
+              normalizedName.includes(alias.toLowerCase()),
           )
         ) {
           matches.push(
@@ -94,7 +94,7 @@ const searchOFACSanctionsTool = AiToolkit.toolDef({
               reason: entity.reason,
               jurisdiction: entity.jurisdiction,
               listingDate: entity.listingDate,
-            })
+            }),
           );
         }
       }
@@ -109,7 +109,7 @@ const searchEUSanctionsTool = AiToolkit.toolDef({
     "Search the European Union sanctions list for a given entity name.",
   input: Schema.Struct({
     entityName: Schema.String.pipe(
-      Schema.description("The entity name to search for in EU sanctions")
+      Schema.description("The entity name to search for in EU sanctions"),
     ),
   }),
   output: Schema.Array(SanctionListInfo),
@@ -144,7 +144,7 @@ const searchEUSanctionsTool = AiToolkit.toolDef({
           entity.aliases.some(
             (alias) =>
               alias.toLowerCase().includes(normalizedName) ||
-              normalizedName.includes(alias.toLowerCase())
+              normalizedName.includes(alias.toLowerCase()),
           )
         ) {
           matches.push(
@@ -155,7 +155,7 @@ const searchEUSanctionsTool = AiToolkit.toolDef({
               reason: entity.reason,
               jurisdiction: entity.jurisdiction,
               listingDate: entity.listingDate,
-            })
+            }),
           );
         }
       }
@@ -170,7 +170,7 @@ const searchUNSanctionsTool = AiToolkit.toolDef({
     "Search the United Nations sanctions list for a given entity name.",
   input: Schema.Struct({
     entityName: Schema.String.pipe(
-      Schema.description("The entity name to search for in UN sanctions")
+      Schema.description("The entity name to search for in UN sanctions"),
     ),
   }),
   output: Schema.Array(SanctionListInfo),
@@ -198,7 +198,7 @@ const searchUNSanctionsTool = AiToolkit.toolDef({
           entity.aliases.some(
             (alias) =>
               alias.toLowerCase().includes(normalizedName) ||
-              normalizedName.includes(alias.toLowerCase())
+              normalizedName.includes(alias.toLowerCase()),
           )
         ) {
           matches.push(
@@ -209,7 +209,7 @@ const searchUNSanctionsTool = AiToolkit.toolDef({
               reason: entity.reason,
               jurisdiction: entity.jurisdiction,
               listingDate: entity.listingDate,
-            })
+            }),
           );
         }
       }
@@ -222,7 +222,7 @@ const searchUNSanctionsTool = AiToolkit.toolDef({
 const sanctionToolkit = AiToolkit.make(
   searchOFACSanctionsTool,
   searchEUSanctionsTool,
-  searchUNSanctionsTool
+  searchUNSanctionsTool,
 );
 
 // Service interface
@@ -231,7 +231,7 @@ export interface SanctionCheckService {
 }
 
 export const SanctionCheckService = Context.GenericTag<SanctionCheckService>(
-  "@reg-tech-demo/SanctionCheckService"
+  "@reg-tech-demo/SanctionCheckService",
 );
 
 // System prompt for the AML agent
@@ -255,7 +255,7 @@ const makeSanctionCheckService = Effect.gen(function* () {
     Schema.Struct({
       apiKey: Schema.String,
       model: Schema.String,
-    })
+    }),
   );
 
   const openaiClient = yield* OpenAiClient.make({
@@ -270,7 +270,7 @@ const makeSanctionCheckService = Effect.gen(function* () {
   });
 
   const checkEntity = (
-    entityName: string
+    entityName: string,
   ): Effect.Effect<SanctionCheckResult> =>
     Effect.gen(function* () {
       const prompt = `
@@ -357,5 +357,5 @@ Be thorough and provide a well-reasoned assessment.`;
 // Export the service layer
 export const SanctionCheckServiceLive = Layer.effect(
   SanctionCheckService,
-  makeSanctionCheckService
+  makeSanctionCheckService,
 );

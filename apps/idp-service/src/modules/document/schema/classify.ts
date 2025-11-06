@@ -1,25 +1,17 @@
-import { z } from 'zod';
+import { Schema } from 'effect';
 
-// Document type enum in snake_case
-export const DocumentTypeEnum = z.enum([
+export const DocumentTypeSchema = Schema.Literal(
   'business_registration',
   'certificate_of_incorporation',
   'industry_licenses',
   'invoice',
   'receipt',
   'unknown',
-]);
+);
 
-export type DocumentType = z.infer<typeof DocumentTypeEnum>;
-
-// Classification result schema
-export const DocumentClassificationSchema = z.object({
-  document_type: DocumentTypeEnum,
-  confidence: z.number().min(0).max(1),
-  reasoning: z.string(),
-  secondary_classifications: z.array(DocumentTypeEnum).nullable(),
+export const DocumentClassificationSchema = Schema.Struct({
+  document_type: DocumentTypeSchema,
+  confidence: Schema.Number,
+  reasoning: Schema.String,
+  secondary_classifications: Schema.Array(DocumentTypeSchema),
 });
-
-export type DocumentClassification = z.infer<
-  typeof DocumentClassificationSchema
->;

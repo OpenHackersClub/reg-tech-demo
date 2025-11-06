@@ -20,17 +20,17 @@
   ],
   "dependencies": {
     "@effect/ai": "^0.18.2",
-    "@effect/ai-openai": "^0.18.2",
+    "@effect/ai-openai": "^0.35.0",
     "@effect/platform": "^0.76.1",
-    "@effect/platform-node": "^0.70.1",
-    "@effect/schema": "^0.79.1",
+    "@effect/platform-node": "^0.70.0",
+    "@effect/schema": "^0.75.5",
     "effect": "^3.12.3",
     "openai": "^4.77.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.10.2",
-    "tsdown": "^0.2.20",
+    "tsdown": "^0.16.0",
     "typescript": "^5.7.2"
   }
 }

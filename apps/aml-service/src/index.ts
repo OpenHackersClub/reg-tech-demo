@@ -32,10 +32,10 @@ const router = HttpRouter.empty.pipe(
         },
         documentation: "See README.md for usage instructions",
       });
-    })
+    }),
   ),
   // Mount sanction routes under /api/sanction
-  HttpRouter.mountApp("/api/sanction", sanctionRouter)
+  HttpRouter.mountApp("/api/sanction", sanctionRouter),
 );
 
 // CORS middleware
@@ -47,15 +47,15 @@ const corsMiddleware = HttpMiddleware.make((app) =>
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      })
+      }),
     );
-  })
+  }),
 );
 
 // Logging middleware
 const loggingMiddleware = HttpMiddleware.make((app) =>
   Effect.gen(function* () {
-    const request = yield* Effect.serviceOption(HttpServer.request.HttpServerRequest);
+    const request = yield* Option(HttpServer.request.HttpServerRequest);
 
     if (request._tag === "Some") {
       const req = request.value;
@@ -65,13 +65,13 @@ const loggingMiddleware = HttpMiddleware.make((app) =>
 
     const response = yield* app;
     return response;
-  })
+  }),
 );
 
 // Create the HTTP application with middleware
 const app = router.pipe(
   HttpRouter.use(loggingMiddleware),
-  HttpRouter.use(corsMiddleware)
+  HttpRouter.use(corsMiddleware),
 );
 
 // Main server program
@@ -94,7 +94,7 @@ const ServerLive = NodeHttpServer.layer(() =>
     const port = yield* PORT;
     const host = yield* HOST;
     return { port, host };
-  })
+  }),
 );
 
 // Combine all layers
