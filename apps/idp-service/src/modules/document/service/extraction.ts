@@ -1,14 +1,47 @@
 import { LanguageModel } from '@effect/ai';
-import { OpenAiClient, OpenAiLanguageModel } from '@effect/ai-openai';
-import { NodeHttpClient } from '@effect/platform-node';
-import { Config, Effect, Layer, Match } from 'effect';
+import type { UserMessagePartEncoded } from '@effect/ai/Prompt';
+import { OpenAiLanguageModel } from '@effect/ai-openai';
+import { Effect, Layer, Match, Schema } from 'effect';
 
-import { CLASSIFY_PROMPT } from '../prompts/classification.js';
-import { RECEIPT_PROMPT } from '../prompts/receipt.js';
-import { DocumentClassificationSchema } from '../schema/classify.js';
-import { ReceiptDataSchema } from '../schema/extraction.js';
+import { OpenAiWithHttp } from '@/service/ai';
+
+import { BUSINESS_REGISTRATION_PROMPT } from '../prompts/business-registration';
+import { CERTIFICATE_OF_INCORPORATION_PROMPT } from '../prompts/ci';
+import { INDUSTRY_LICENSE_PROMPT } from '../prompts/industry-license';
+import { INVOICE_PROMPT } from '../prompts/invoice';
+import { RECEIPT_PROMPT } from '../prompts/receipt';
+import { DocumentTypeSchema } from '../schema/classify';
+import {
+  BusinessRegistrationDataSchema,
+  CertificateOfIncorporationDataSchema,
+  IndustryLicenseDataSchema,
+  InvoiceDataSchema,
+  ReceiptDataSchema,
+} from '../schema/extraction';
+import { classification } from './classify';
+
+const DocType = DocumentTypeSchema.pipe(
+  Schema.pickLiteral(
+    'business_registration',
+    'certificate_of_incorporation',
+    'industry_licenses',
+    'invoice',
+    'receipt',
+  ),
+);
 
 const Llama4 = OpenAiLanguageModel.model('meta-llama/llama-4-maverick');
+
+export type ExtractionDocument = {
+  file: Buffer<ArrayBuffer>;
+  mediaType: string;
+};
+
+type ExtractionParams = {
+  docs?: ExtractionDocument[];
+  docString?: string;
+  type: typeof DocType.Type;
+};
 
 export class DocumentExtraction extends Effect.Service<DocumentExtraction>()(
   'app/documentExtraction',
@@ -16,106 +49,116 @@ export class DocumentExtraction extends Effect.Service<DocumentExtraction>()(
     effect: Effect.gen(function* () {
       const llama4 = yield* Llama4;
 
-      const classification = (doc: Buffer<ArrayBuffer>) =>
+      const extraction = (params: ExtractionParams) =>
         Effect.gen(function* () {
-          const response = yield* LanguageModel.generateObject({
-            prompt: [
-              {
-                role: 'system',
-                content: CLASSIFY_PROMPT,
-              },
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'text',
-                    text: 'Classify the following document.',
-                  },
-                  {
-                    type: 'file',
-                    data: doc,
-                    mediaType: 'image/jpeg',
-                    options: {
-                      openai: {
-                        imageDetail: 'auto',
-                      },
-                    },
-                  },
-                ],
-              },
-            ],
-            schema: DocumentClassificationSchema,
-          });
-          return response.value;
-        });
+          const promptMatcher = Match.value(params.type).pipe(
+            Match.when('receipt', () => RECEIPT_PROMPT),
+            Match.when(
+              'business_registration',
+              () => BUSINESS_REGISTRATION_PROMPT,
+            ),
+            Match.when(
+              'certificate_of_incorporation',
+              () => CERTIFICATE_OF_INCORPORATION_PROMPT,
+            ),
+            Match.when('industry_licenses', () => INDUSTRY_LICENSE_PROMPT),
+            Match.when('invoice', () => INVOICE_PROMPT),
+            Match.exhaustive,
+          );
 
-      const extraction = (doc: Buffer<ArrayBuffer>) =>
-        Effect.gen(function* () {
+          const schemaMatcher = Match.value(params.type).pipe(
+            Match.when('receipt', () => ReceiptDataSchema),
+            Match.when(
+              'business_registration',
+              () => BusinessRegistrationDataSchema,
+            ),
+            Match.when(
+              'certificate_of_incorporation',
+              () => CertificateOfIncorporationDataSchema,
+            ),
+            Match.when('industry_licenses', () => IndustryLicenseDataSchema),
+            Match.when('invoice', () => InvoiceDataSchema),
+            Match.exhaustive,
+          );
+
+          const userContent: UserMessagePartEncoded[] = [];
+
+          if (params.docs && params.docs.length > 0) {
+            userContent.push({
+              type: 'text',
+              text: 'Please extract all data from these documents and return it in the structured format.',
+            });
+
+            for (const doc of params.docs) {
+              userContent.push({
+                type: 'file',
+                data: doc.file,
+                mediaType: doc.mediaType,
+                options: {
+                  openai: {
+                    imageDetail: 'auto',
+                  },
+                },
+              });
+            }
+          }
+
+          if (params.docString) {
+            userContent.push({
+              type: 'text',
+              text: `Please extract all data from these documents and return it in the structured format. Document content: ${params.docString}`,
+            });
+          }
+
           const response = yield* LanguageModel.generateObject({
             prompt: [
               {
                 role: 'system',
-                content: RECEIPT_PROMPT,
+                content: promptMatcher,
               },
               {
                 role: 'user',
-                content: [
-                  {
-                    type: 'text',
-                    text: 'Please extract all data from this receipt image and return it in the structured format.',
-                  },
-                  {
-                    type: 'file',
-                    data: doc,
-                    mediaType: 'image/jpeg',
-                    options: {
-                      openai: {
-                        imageDetail: 'auto',
-                      },
-                    },
-                  },
-                ],
+                content: userContent,
               },
             ],
-            schema: ReceiptDataSchema,
+            //@ts-expect-error
+            schema: schemaMatcher,
+            objectName: 'extraction_result',
           });
           return response.value;
         });
 
       return {
-        extraction: (doc: Buffer<ArrayBuffer>) =>
-          Effect.provide(extraction(doc), llama4),
-        classification: (doc: Buffer<ArrayBuffer>) =>
-          Effect.provide(classification(doc), llama4),
+        extraction: (params: ExtractionParams) =>
+          Effect.provide(extraction(params), llama4),
+        classification: (params: Omit<ExtractionParams, 'type'>) =>
+          Effect.provide(classification(params), llama4),
       };
     }),
   },
 ) {}
 
-export async function extractDocument(doc: Buffer<ArrayBuffer>) {
-  const OpenAi = OpenAiClient.layerConfig({
-    apiKey: Config.redacted('OPENAI_API_KEY'),
-    apiUrl: Config.string('OPENAI_API_BASE_URL'),
-  });
-
-  const OpenAiWithHttp = Layer.provide(OpenAi, NodeHttpClient.layerUndici);
-
+export async function extractDocument(params: Omit<ExtractionParams, 'type'>) {
   const documentExtraction = Effect.gen(function* () {
     const service = yield* DocumentExtraction;
-    const classification = yield* service.classification(doc);
+    const classification = yield* service.classification({
+      docs: params.docs,
+      docString: params.docString,
+    });
 
-    const matcher = Match.value(classification.document_type).pipe(
-      Match.when('receipt', function* () {
-        return yield* service.extraction(doc);
-      }),
+    if (classification.document_type === 'unknown') {
+      yield* Effect.fail('Document type is unknown');
+    }
 
-      Match.orElse(() => {
-        throw new Error('Unknown document type');
-      }),
-    );
-
-    const result = yield* matcher;
-    return result;
+    const result = yield* service.extraction({
+      type: classification.document_type as typeof DocType.Type,
+      docs: params.docs,
+      docString: params.docString,
+    });
+    return {
+      ...result,
+      classification,
+    };
   });
 
   const DocumentExtractionLayer = Layer.provide(

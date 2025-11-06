@@ -105,6 +105,7 @@ For each purchased item, extract:
 - Arrays must be used for multiple items, even if only one item exists
 - Boolean fields for flags (e.g., is_taxable, is_refund)
 - Null for missing data, not empty strings or zeros
+- Fill the extract content as markdown in the "markdown" field
 
 ## Validation Checks
 

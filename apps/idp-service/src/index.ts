@@ -1,11 +1,14 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
+import { logger } from 'hono/logger';
 
-import { env } from '@/config/env.js';
+import { env } from '@/config/env';
 
-import { documentRoute } from './modules/document/route.js';
+import { documentRoute } from './modules/document/route';
 
 const app = new Hono();
+
+app.use(logger());
 
 app.get('/', (c) => {
   return c.json({
