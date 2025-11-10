@@ -3,6 +3,7 @@ import type { UserMessagePartEncoded } from '@effect/ai/Prompt';
 import { OpenAiLanguageModel } from '@effect/ai-openai';
 import { Effect, Layer, Match, Schema } from 'effect';
 
+import { OtelLayer } from '@/modules/langfuse/layer';
 import { OpenAiWithHttp } from '@/service/ai';
 
 import { BUSINESS_REGISTRATION_PROMPT } from '../prompts/business-registration';
@@ -45,6 +46,16 @@ type ExtractionParams = {
 
 const extraction = (params: ExtractionParams) =>
   Effect.gen(function* () {
+    // Add trace-level metadata
+    yield* Effect.annotateCurrentSpan({
+      'langfuse.trace.name': 'document-extraction',
+      'langfuse.trace.userId': 'iyansr', // Add if you have user context
+      'langfuse.trace.sessionId': 'test-session', // Add if you track sessions
+      'langfuse.trace.metadata.document_type': params.type,
+      'langfuse.trace.metadata.doc_count': params.docs?.length || 0,
+      'langfuse.trace.tags': JSON.stringify(['extraction', params.type]),
+    });
+
     const promptMatcher = Match.value(params.type).pipe(
       Match.when('receipt', () => RECEIPT_PROMPT),
       Match.when('business_registration', () => BUSINESS_REGISTRATION_PROMPT),
@@ -98,6 +109,16 @@ const extraction = (params: ExtractionParams) =>
       });
     }
 
+    const input = userContent.map((item) => ({
+      type: item.type,
+      text: item.type === 'text' ? item.text : undefined,
+      mediaType: item.type === 'file' ? item.mediaType : undefined,
+    }));
+
+    yield* Effect.annotateCurrentSpan({
+      'langfuse.observation.input': JSON.stringify(input),
+    });
+
     const response = yield* LanguageModel.generateObject({
       prompt: [
         {
@@ -113,8 +134,21 @@ const extraction = (params: ExtractionParams) =>
       schema: schemaMatcher,
       objectName: 'extraction_result',
     });
-    return response.value;
-  });
+
+    // Add output annotation
+    yield* Effect.annotateCurrentSpan({
+      'langfuse.observation.output': JSON.stringify(response.value),
+    });
+
+    return { input, output: response.value };
+  }).pipe(
+    Effect.withSpan('document-extraction', {
+      attributes: {
+        'operation.type': 'extraction',
+        'document.type': params.type,
+      },
+    }),
+  );
 
 export class DocumentExtraction extends Effect.Service<DocumentExtraction>()(
   'app/documentExtraction',
@@ -155,7 +189,7 @@ export async function extractDocument(params: Omit<ExtractionParams, 'type'>) {
       docString: params.docString,
     });
     return {
-      ...result,
+      ...result.output,
       classification,
     };
   });
@@ -166,6 +200,9 @@ export async function extractDocument(params: Omit<ExtractionParams, 'type'>) {
   );
 
   return Effect.runPromise(
-    Effect.provide(documentExtraction, DocumentExtractionLayer),
+    documentExtraction.pipe(
+      Effect.provide(DocumentExtractionLayer),
+      Effect.provide(OtelLayer),
+    ),
   );
 }

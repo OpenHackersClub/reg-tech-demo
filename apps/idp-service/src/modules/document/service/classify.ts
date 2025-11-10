@@ -3,6 +3,7 @@ import type { UserMessagePartEncoded } from '@effect/ai/Prompt';
 import { OpenAiLanguageModel } from '@effect/ai-openai';
 import { Effect } from 'effect';
 
+import { OtelLayer } from '@/modules/langfuse/layer';
 import { OpenAiWithHttp } from '@/service/ai';
 
 import { CLASSIFY_PROMPT } from '../prompts/classification';
@@ -19,6 +20,14 @@ type ClassificationParams = {
 export const classification = (params: ClassificationParams) =>
   Effect.gen(function* () {
     const userContent: UserMessagePartEncoded[] = [];
+
+    yield* Effect.annotateCurrentSpan({
+      'langfuse.trace.name': 'document-classification',
+      'langfuse.trace.userId': 'iyansr', // Add if you have user context
+      'langfuse.trace.sessionId': 'test-session', // Add if you track sessions
+      'langfuse.trace.metadata.doc_count': params.docs?.length || 0,
+      'langfuse.trace.tags': JSON.stringify(['classification']),
+    });
 
     if (params.docs && params.docs.length > 0) {
       userContent.push({
@@ -47,6 +56,15 @@ export const classification = (params: ClassificationParams) =>
       });
     }
 
+    // Add input annotation
+    yield* Effect.annotateCurrentSpan({
+      'langfuse.observation.input': userContent.map((item) => ({
+        type: item.type,
+        text: item.type === 'text' ? item.text : undefined,
+        mediaType: item.type === 'file' ? item.mediaType : undefined,
+      })),
+    });
+
     const response = yield* LanguageModel.generateObject({
       prompt: [
         {
@@ -61,20 +79,23 @@ export const classification = (params: ClassificationParams) =>
       objectName: 'classify_result',
       schema: DocumentClassificationSchema,
     });
+
+    // Add output annotation
+    yield* Effect.annotateCurrentSpan({
+      'langfuse.observation.output': JSON.stringify(response.value),
+    });
+
     return response.value;
-  });
+  }).pipe(Effect.withSpan('document-classification'));
 
 export async function classifyDocumentLayer(params: ClassificationParams) {
   const Llama4 = OpenAiLanguageModel.model('meta-llama/llama-4-maverick');
 
-  const program = Effect.gen(function* () {
-    const llama4 = yield* Llama4;
-    const classificationResult = yield* Effect.provide(
-      classification(params),
-      llama4,
-    );
-    return classificationResult;
-  });
+  const program = classification(params).pipe(
+    Effect.provide(Llama4),
+    Effect.provide(OpenAiWithHttp),
+    Effect.provide(OtelLayer),
+  );
 
-  return Effect.runPromise(Effect.provide(program, OpenAiWithHttp));
+  return Effect.runPromise(program);
 }
