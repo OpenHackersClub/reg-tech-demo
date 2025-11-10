@@ -3,8 +3,10 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:cf": "wrangler dev",
     "build": "tsdown --config tsdown.config.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.51.0",
@@ -18,14 +20,17 @@
     "hono": "^4.10.4",
     "openai": "^6.8.0",
     "pdf-to-img": "^5.0.0",
+    "pdf2pic": "^3.2.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.3",
+    "@cloudflare/workers-types": "^4.20251106.1",
     "@types/node": "^20.11.17",
     "tsdown": "^0.15.12",
     "tsx": "^4.7.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "wrangler": "^4.46.0"
   },
   "engines": {
     "node": ">=22"

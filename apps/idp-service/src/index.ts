@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 
 import { env } from '@/config/env';
@@ -9,6 +10,7 @@ import { documentRoute } from './modules/document/route';
 const app = new Hono();
 
 app.use(logger());
+app.use(cors());
 
 app.get('/', (c) => {
   return c.json({
@@ -45,3 +47,15 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+
+// // Error handler
+// app.onError((err, c) => {
+//   if (err instanceof HTTPException) {
+//     return c.json({ error: err.message }, err.status);
+//   }
+
+//   console.error('Unhandled error:', err);
+//   return c.json({ error: 'Internal Server Error', details: err }, 500);
+// });
+
+// export default app;

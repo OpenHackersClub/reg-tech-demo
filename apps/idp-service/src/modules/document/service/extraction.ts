@@ -43,90 +43,84 @@ type ExtractionParams = {
   type: typeof DocType.Type;
 };
 
+const extraction = (params: ExtractionParams) =>
+  Effect.gen(function* () {
+    const promptMatcher = Match.value(params.type).pipe(
+      Match.when('receipt', () => RECEIPT_PROMPT),
+      Match.when('business_registration', () => BUSINESS_REGISTRATION_PROMPT),
+      Match.when(
+        'certificate_of_incorporation',
+        () => CERTIFICATE_OF_INCORPORATION_PROMPT,
+      ),
+      Match.when('industry_licenses', () => INDUSTRY_LICENSE_PROMPT),
+      Match.when('invoice', () => INVOICE_PROMPT),
+      Match.exhaustive,
+    );
+
+    const schemaMatcher = Match.value(params.type).pipe(
+      Match.when('receipt', () => ReceiptDataSchema),
+      Match.when('business_registration', () => BusinessRegistrationDataSchema),
+      Match.when(
+        'certificate_of_incorporation',
+        () => CertificateOfIncorporationDataSchema,
+      ),
+      Match.when('industry_licenses', () => IndustryLicenseDataSchema),
+      Match.when('invoice', () => InvoiceDataSchema),
+      Match.exhaustive,
+    );
+
+    const userContent: UserMessagePartEncoded[] = [];
+
+    if (params.docs && params.docs.length > 0) {
+      userContent.push({
+        type: 'text',
+        text: 'Please extract all data from these documents and return it in the structured format.',
+      });
+
+      for (const doc of params.docs) {
+        userContent.push({
+          type: 'file',
+          data: doc.file,
+          mediaType: doc.mediaType,
+          options: {
+            openai: {
+              imageDetail: 'auto',
+            },
+          },
+        });
+      }
+    }
+
+    if (params.docString) {
+      userContent.push({
+        type: 'text',
+        text: `Please extract all data from these documents and return it in the structured format. Document content: ${params.docString}`,
+      });
+    }
+
+    const response = yield* LanguageModel.generateObject({
+      prompt: [
+        {
+          role: 'system',
+          content: promptMatcher,
+        },
+        {
+          role: 'user',
+          content: userContent,
+        },
+      ],
+      //@ts-expect-error
+      schema: schemaMatcher,
+      objectName: 'extraction_result',
+    });
+    return response.value;
+  });
+
 export class DocumentExtraction extends Effect.Service<DocumentExtraction>()(
   'app/documentExtraction',
   {
     effect: Effect.gen(function* () {
       const llama4 = yield* Llama4;
-
-      const extraction = (params: ExtractionParams) =>
-        Effect.gen(function* () {
-          const promptMatcher = Match.value(params.type).pipe(
-            Match.when('receipt', () => RECEIPT_PROMPT),
-            Match.when(
-              'business_registration',
-              () => BUSINESS_REGISTRATION_PROMPT,
-            ),
-            Match.when(
-              'certificate_of_incorporation',
-              () => CERTIFICATE_OF_INCORPORATION_PROMPT,
-            ),
-            Match.when('industry_licenses', () => INDUSTRY_LICENSE_PROMPT),
-            Match.when('invoice', () => INVOICE_PROMPT),
-            Match.exhaustive,
-          );
-
-          const schemaMatcher = Match.value(params.type).pipe(
-            Match.when('receipt', () => ReceiptDataSchema),
-            Match.when(
-              'business_registration',
-              () => BusinessRegistrationDataSchema,
-            ),
-            Match.when(
-              'certificate_of_incorporation',
-              () => CertificateOfIncorporationDataSchema,
-            ),
-            Match.when('industry_licenses', () => IndustryLicenseDataSchema),
-            Match.when('invoice', () => InvoiceDataSchema),
-            Match.exhaustive,
-          );
-
-          const userContent: UserMessagePartEncoded[] = [];
-
-          if (params.docs && params.docs.length > 0) {
-            userContent.push({
-              type: 'text',
-              text: 'Please extract all data from these documents and return it in the structured format.',
-            });
-
-            for (const doc of params.docs) {
-              userContent.push({
-                type: 'file',
-                data: doc.file,
-                mediaType: doc.mediaType,
-                options: {
-                  openai: {
-                    imageDetail: 'auto',
-                  },
-                },
-              });
-            }
-          }
-
-          if (params.docString) {
-            userContent.push({
-              type: 'text',
-              text: `Please extract all data from these documents and return it in the structured format. Document content: ${params.docString}`,
-            });
-          }
-
-          const response = yield* LanguageModel.generateObject({
-            prompt: [
-              {
-                role: 'system',
-                content: promptMatcher,
-              },
-              {
-                role: 'user',
-                content: userContent,
-              },
-            ],
-            //@ts-expect-error
-            schema: schemaMatcher,
-            objectName: 'extraction_result',
-          });
-          return response.value;
-        });
 
       return {
         extraction: (params: ExtractionParams) =>
@@ -146,8 +140,13 @@ export async function extractDocument(params: Omit<ExtractionParams, 'type'>) {
       docString: params.docString,
     });
 
-    if (classification.document_type === 'unknown') {
-      yield* Effect.fail('Document type is unknown');
+    if (
+      classification.document_type === 'unknown' ||
+      classification.confidence < 0.7
+    ) {
+      return {
+        classification,
+      };
     }
 
     const result = yield* service.extraction({
