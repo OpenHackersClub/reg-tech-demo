@@ -1,4 +1,5 @@
-import { pgTable, text, integer, boolean, timestamp, pgEnum, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, boolean, timestamp, pgEnum, jsonb, uuid, index } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 export const priorityEnum = pgEnum('priority', ['high', 'medium', 'low']);
 export const statusEnum = pgEnum('status', ['open', 'in_progress', 'closed']);
@@ -117,3 +118,32 @@ export const clientDocuments = pgTable('client_documents', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+/**
+ * Immutable audit trail for FR-007.
+ * Every alert state change and user action is appended here; rows are never updated or deleted.
+ * Query path: (entityType, entityId) ordered by timestamp desc — index supports it.
+ */
+export const auditTrail = pgTable(
+  'audit_trail',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    // null when the actor is the system (e.g. agent-generated alert)
+    userId: text('user_id'),
+    // dotted form, e.g. 'alert.status_change', 'document.review'
+    action: text('action').notNull(),
+    // e.g. 'alert', 'document', 'workflow'
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id').notNull(),
+    // free-form payload: old/new values, reason, metadata
+    details: jsonb('details'),
+    timestamp: timestamp('timestamp', { withTimezone: true }).default(sql`now()`).notNull(),
+  },
+  (table) => ({
+    entityTimestampIdx: index('audit_trail_entity_timestamp_idx').on(
+      table.entityType,
+      table.entityId,
+      table.timestamp,
+    ),
+  }),
+);
